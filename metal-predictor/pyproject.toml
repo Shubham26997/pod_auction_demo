@@ -1,0 +1,27 @@
+[project]
+name = "metal-predictor"
+version = "0.1.0"
+description = "Metal Price Prediction System using RAG and Qdrant Vector DB"
+requires-python = ">=3.12"
+dependencies = [
+    "yfinance>=0.2.50",
+    "pandas>=2.2.0",
+    "numpy>=1.26.0",
+    "langchain>=1.0.0",
+    "langchain-classic>=1.0.0",
+    "langchain-openai>=0.2.0",
+    "langchain-community>=0.3.0",
+    "langchain-qdrant>=0.2.0",
+    "qdrant-client>=1.11.0",
+    "openai>=1.50.0",
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "python-dotenv>=1.0.0",
+    "httpx>=0.27.0",
+    "apscheduler>=3.10.0",
+    "redis>=5.0.0",
+    "hiredis>=2.3.0",
+]
+
+[tool.uv]
+package = false

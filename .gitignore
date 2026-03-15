@@ -1,0 +1,30 @@
+## Python ##
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+*.log
+*.bak
+*.swp
+.DS_Store
+.idea/
+.vscode/
+*.egg-info/
+dist/
+build/
+*.egg
+*.whl
+*.tar.gz
+*.zip
+*.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+## Project files ##
+.venv/
+.env
+qdrant_storage/

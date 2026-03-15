@@ -1,0 +1,71 @@
+services:
+
+  # ── Qdrant vector database (standalone server) ───────────────────────────
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"   # REST API  →  dashboard at http://localhost:6333/dashboard
+      - "6334:6334"   # gRPC
+    volumes:
+      - qdrant_data:/qdrant/storage   # persists collections across restarts
+    restart: unless-stopped
+    healthcheck:
+      # qdrant/qdrant image does not ship curl or wget.
+      # bash TCP redirection tests the port directly without any HTTP tool.
+      test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/6333' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ── Redis cache (optional) ────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── FastAPI prediction service ────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8000"
+    env_file:
+      - .env
+    volumes:
+      - .:/app              # live code sync — restart api to pick up Python changes
+      - /app/.venv          # keeps the .venv built into the image (not overwritten by bind-mount)
+      - /app/dashboard      # keeps the React build from Stage 1 (not overwritten by bind-mount)
+    environment:
+      # Tell the app to connect to the Qdrant server container instead of
+      # using embedded file mode.
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      qdrant:
+        condition: service_healthy   # wait until Qdrant passes its health-check
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      # Port 8001 is the HOST mapping. Inside the container the API always
+      # listens on 8000 — that is what curl must hit from inside the container.
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+
+volumes:
+  qdrant_data:
+    driver: local
+  redis_data:
+    driver: local

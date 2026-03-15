@@ -1,0 +1,46 @@
+import React from 'react'
+import toast from 'react-hot-toast'
+import { format } from 'date-fns'
+
+function DownloadIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="7 10 12 15 17 10" />
+      <line x1="12" y1="15" x2="12" y2="3" />
+    </svg>
+  )
+}
+
+export default function ExportButton({ chartContainerRef, metal, range }) {
+  const handleExport = async () => {
+    if (!chartContainerRef.current) return
+    try {
+      const html2canvas = (await import('html2canvas')).default
+      const canvas = await html2canvas(chartContainerRef.current, {
+        backgroundColor: '#161920',
+        scale: 2,
+        useCORS: true,
+        logging: false,
+      })
+      const link = document.createElement('a')
+      const dateStr = format(new Date(), 'yyyy-MM-dd')
+      link.download = `${metal}-${range}-${dateStr}.png`
+      link.href = canvas.toDataURL('image/png')
+      link.click()
+      toast.success('Chart saved as PNG')
+    } catch {
+      toast.error('Export failed')
+    }
+  }
+
+  return (
+    <button
+      onClick={handleExport}
+      className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-gray-100 dark:hover:bg-metal-border transition-all min-h-[44px]"
+    >
+      <DownloadIcon />
+      <span className="hidden sm:inline">Export PNG</span>
+    </button>
+  )
+}
