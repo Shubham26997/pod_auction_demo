@@ -1,5 +1,4 @@
-.venv/
-.env
+## Python ##
 __pycache__/
 *.pyc
 *.pyo
@@ -24,3 +23,8 @@ build/
 htmlcov/
 .tox/
 .nox/
+
+## Project files ##
+.venv/
+.env
+qdrant_storage/
